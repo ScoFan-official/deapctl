@@ -77,7 +77,7 @@ def main():
     run(["node", "list", AGENT, WF])
     run(["node", "param-add", AGENT, WF, "听记原文", "--desc", "粘贴的听记/纪要文本"])
     run(["node", "insert", AGENT, WF, "向大模型提问", "--after", "1"])
-    run(["node", "config", AGENT, WF, "2.", "--spec",
+    run(["node", "config", AGENT, WF, "向大模型提问", "--spec",
          json.dumps({"type": "llm", "model": "通义千问3.0-max",
                      "question_vars": ["听记原文"],
                      "prompt": "把听记拆解为任务清单，输出 JSON。"}, ensure_ascii=False)])

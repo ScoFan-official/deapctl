@@ -37,15 +37,23 @@ bundled Chromium（playwright chromium-1234），profile 已登录。
 
 ## 修复记录（2026-10-04）
 
-**根因**：`pick_var`/`_bind_record_field` 靠「展开折叠组 + 滚动虚拟化树」遍历
-变量面板找叶子，渲染时序不稳定，4 轮尝试内叶子可能未渲染 → 间歇性漏选。
+**真根因（两层叠加）**：
 
-**修复**：picker-pane_ 内自带 `input.dtd-search-bar-input` 搜索框
-（"搜索关键字或变量名称"），搜索是权威过滤。两处选择循环改为：
-精确匹配 → 有搜索框则 fillIn 变量名直达 → 已搜索仍无 = 变量缺失/类型过滤，
-带 `no-leaf-searched:` + 剩余标题报错；无搜索框才回退 expand/scroll。
-picked 后清空搜索框防残留过滤。
+1. **节点未持久化**：`insert_node`/`insert_into_loop`/`delete_node` 都不调
+   `save()`——改动只活在画布内存态。`param_add` 开抽屉再 save 时编辑器
+   从持久态重渲染，未保存的插入节点被丢弃 → 后续 `find_node` 报 NOT_FOUND，
+   或误命中同序号包装节点开错抽屉（第一次 verify_all 的"变量未选中"很可能
+   就是 LLM 节点丢失后 "2." 命中了「就执行/指定操作」包装节点、面板里
+   自然没有该变量——误诊为 pick_var 时序问题）。
+   **修复**：三个节点变更操作末尾补 `self.save()`；verify_all 节点选择器
+   从硬编码 "2." 改为标题 "向大模型提问"（画布上无编号包装节点占位、
+   序号会漂移，标题选择器才稳）。
 
-**验证**：复测机 param-add → insert → config 绑 `听记原文` ✅；
-不存在变量报错信息改善为「已用面板搜索过滤确认不在列表中」。
+2. **pick_var 遍历脆弱（顺带修复）**：原靠 expand/scroll 遍历虚拟化树
+   找叶子。picker-pane_ 自带 `input.dtd-search-bar-input` 搜索框，搜索是
+   权威过滤——改为搜索直达；搜后仍无 = 变量缺失/类型不匹配，报错带上下文；
+   无搜索框才回退 expand/scroll；picked 后清空搜索框。
+
+**验证**：复测机 insert → param-add → config 绑 `听记原文` 全链路 ✅
+（param-add 的 save 后 LLM 节点仍在画布）；不存在变量报错信息改善。
 

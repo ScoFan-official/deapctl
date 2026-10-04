@@ -100,6 +100,7 @@ class WfEditor:
         if r != "clicked":
             raise OpError("SELECTOR_MISS", f"节点类型 '{type_name}' 不在面板中")
         self.sess.b.wait(1800)
+        self.save()  # 画布改动不持久化——不调 save，下一次抽屉/save 重渲染会丢节点
         return {"nodes": self.nodes()}
 
     def insert_into_loop(self, loop_seq, type_name, position="top"):
@@ -122,6 +123,7 @@ class WfEditor:
         if r != "clicked":
             raise OpError("SELECTOR_MISS", f"节点类型 '{type_name}' 不在面板中")
         self.sess.b.wait(1800)
+        self.save()  # 同 insert_node：画布改动须立即持久化
         return {"nodes": self.nodes()}
 
     def delete_node(self, seq_or_title):
@@ -141,9 +143,9 @@ class WfEditor:
             raise OpError("SELECTOR_MISS", "节点 ⋯ 菜单/删除项未出现")
         self.sess.b.wait(1200)
         # 确认弹窗
-        self.sess.b.ev("""(()=>{const m=[...document.querySelectorAll('.dtd-modal,[role=dialog],[class*=popconfirm]')].filter(e=>__deap.vis(e)).pop();
-          if(m){const btn=[...m.querySelectorAll('button')].find(e=>__deap.vis(e)&&['删除','确定','确认'].includes((e.innerText||'').trim()));if(btn)__deap.clickEl(btn)}})()""")
+        self.sess.b.confirm_modal()
         self.sess.b.wait(1500)
+        self.save()  # 同 insert_node：画布改动须立即持久化
         return {"nodes": self.nodes()}
 
     # ---- 触发节点参数 ----
