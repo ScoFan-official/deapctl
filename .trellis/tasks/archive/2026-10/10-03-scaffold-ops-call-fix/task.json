@@ -1,0 +1,28 @@
+{
+  "id": "scaffold-ops-call-fix",
+  "name": "scaffold-ops-call-fix",
+  "title": "修复 scaffold 的 ops 调用名与 envelope 解包",
+  "description": "scaffold.py 引用不存在的 ag.set_persona/ag.save 且未解包 list_agents envelope，整条命令不可跑",
+  "status": "completed",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "qihaonan",
+  "assignee": "qihaonan",
+  "createdAt": "2026-10-03",
+  "completedAt": "2026-10-03",
+  "branch": null,
+  "base_branch": "main",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "triage": "ready-for-agent"
+  }
+}
