@@ -241,8 +241,16 @@ class WfEditor:
               if(!p) return 'no-panel';
               const leaf={json.dumps(leaf)};
               const items=[...p.querySelectorAll('[class*=pane-item-title],.dtd-tree-title span')].filter(e=>__deap.vis(e)&&(e.innerText||'').trim()===leaf);
-              if(items.length){{__deap.clickEl(items[items.length-1]);return 'picked'}}
-              // 未找到：展开下一个折叠组（含 '+'/'>' 箭头的父节点行）
+              if(items.length){{__deap.clickEl(items[items.length-1]);
+                const si=p.querySelector('input.dtd-search-bar-input');if(si&&si.value)__deap.fillIn(si,'');
+                return 'picked'}}
+              // 面板自带搜索框（dtd-search-bar-input）：搜索是权威过滤，
+              // 优先于 expand/scroll 遍历虚拟化树（后者渲染时序不稳曾致间歇性漏选）。
+              const si=p.querySelector('input.dtd-search-bar-input');
+              if(si){{
+                if((si.value||'')!==leaf){{__deap.fillIn(si,leaf);return 'searched'}}
+                return 'no-leaf-searched:'+[...p.querySelectorAll('[class*=pane-item-title],.dtd-tree-title span')].filter(e=>__deap.vis(e)).slice(-20).map(e=>(e.innerText||'').trim()).join('|')}}
+              // 无搜索框的老面板：展开下一个折叠组（含 '+'/'>' 箭头的父节点行）
               const sw=[...p.querySelectorAll('.dtd-tree-switcher,[class*=switcher],[class*=arrow]')].filter(e=>__deap.vis(e));
               const closed=sw.find(e=>!String(e.className).includes('open'));
               if(closed){{__deap.clickEl(closed);return 'expand'}}
@@ -258,9 +266,11 @@ class WfEditor:
                         self.sess.b.click_xy(r["editor"]["x"], r["editor"]["y"])
                         self.sess.b.wait(500)
                     self.sess.b.click_xy(r["icon"]["x"], r["icon"]["y"])
+            if isinstance(r2, str) and r2.startswith("no-leaf-searched:"):
+                break  # 搜索过滤是权威结果，搜不到=变量不存在或被类型过滤，不再展开/滚动
             self.sess.b.wait(900)
         if not isinstance(r2, str) or not r2.startswith("picked"):
-            raise OpError("SELECTOR_MISS", f"变量 '{var_text}' 未选中", str(r2)[:300])
+            raise OpError("SELECTOR_MISS", f"变量 '{var_text}' 未选中（已用面板搜索过滤确认不在列表中，可能是变量缺失或类型不匹配）" if isinstance(r2, str) and r2.startswith("no-leaf-searched:") else f"变量 '{var_text}' 未选中", str(r2)[:300])
         self.sess.b.wait(800)
 
     def fill_slate(self, field_label, text, ed_index=None):
@@ -501,12 +511,20 @@ class WfEditor:
             r2 = self.sess.b.ev(f"""(()=>{{const p=[...document.querySelectorAll('[class*=\"picker-pane_\"]')].filter(e=>__deap.vis(e)).pop();
               if(!p) return 'no-panel';
               const items=[...p.querySelectorAll('[class*=pane-item-title]')].filter(e=>__deap.vis(e)&&(e.innerText||'').trim()==={json.dumps(leaf)});
-              if(items.length){{__deap.clickEl(items[items.length-1]);return 'picked'}}
+              if(items.length){{__deap.clickEl(items[items.length-1]);
+                const si=p.querySelector('input.dtd-search-bar-input');if(si&&si.value)__deap.fillIn(si,'');
+                return 'picked'}}
+              const si=p.querySelector('input.dtd-search-bar-input');
+              if(si){{
+                if((si.value||'')!=={json.dumps(leaf)}){{__deap.fillIn(si,{json.dumps(leaf)});return 'searched'}}
+                return 'no-leaf'}}
               const hold=p.querySelector('.dtd-tree-list-holder,[class*=holder]');
               if(hold&&hold.scrollTop+hold.clientHeight<hold.scrollHeight-20){{hold.scrollTop+=300;return 'scroll'}}
               return 'no-leaf'}})()""")
             if r2 == "picked":
                 break
+            if r2 == "no-leaf":
+                break  # 搜索过滤后的 no-leaf 是权威判定
             self.sess.b.wait(900)
         if r2 != "picked":
             raise OpError("VAR_TYPE_MISMATCH" if r2 == "no-leaf" else "SELECTOR_MISS",

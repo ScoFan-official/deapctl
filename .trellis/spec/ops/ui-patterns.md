@@ -46,7 +46,7 @@ ops 层反复出现的界面套路。新功能先在这里找现成写法；踩�
 | `dtd-select` 下拉 | 点搜索输入框开层 → 全局按文本选 option（`wfnode.select_option`） |
 | `.dtd-switch` 开关 | 先判 `aria-checked`/class checked 再决定点不点（`workflow.enable`） |
 | Slate `[contenteditable]` | `click_xy` 聚焦 → `b.type`（`conv._fill_modal`、`wfnode.fill_slate`） |
-| 变量绑定 | `pick_var(label, 叶子名)`：聚焦 → ⊕ → `picker-pane_` 展开/滚动 → dispatch 叶 |
+| 变量绑定 | `pick_var(label, 叶子名)`：聚焦 → ⊕ → `picker-pane_` → **优先 `input.dtd-search-bar-input` 搜索直达**（搜索是权威过滤；搜后仍无 = 变量缺失/类型不匹配，勿再 expand/scroll——虚拟化树渲染时序不稳曾致间歇漏选，见 .scratch/inbox/02）；无搜索框才回退展开/滚动 → dispatch 叶；picked 后清空搜索框 |
 | 枚举/固定值字段 | 不能绑变量——`fixed` 写字面值；select 型先点开再选文本（`wfnode._set_record_field_literal`） |
 
 ## 画布操作（`wfnode.py`）

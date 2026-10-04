@@ -49,7 +49,7 @@
 | insert_into_loop | 🟡 | 落顶部，需倒序 |
 | delete（⋯菜单） | ✅ | |
 | param-add（触发节点） | ✅ | 名称/类型/默认值/说明/必填 |
-| llm config（模型/问题变量/提示词/结构化输出/JSON模式） | 🟡 | 模型✅ 提示词✅；**变量绑定 verify_all 报 SELECTOR_MISS（疑似时序，见 .scratch/inbox/02）**；结构化输出/JSON模式早前手工验证同路径 |
+| llm config（模型/问题变量/提示词/结构化输出/JSON模式） | ✅ | 模型/变量绑定/提示词 E2E 实测（10-04 修复 pick_var 搜索直达后复测）；结构化输出/JSON模式早前手工验证同路径 |
 | loop bind（数组变量） | 🟡 | |
 | record config（base/table/字段绑定/枚举字面值） | 🟡 | base 选择在 iframe，已处理 |
 | end config | 🟡 | |
