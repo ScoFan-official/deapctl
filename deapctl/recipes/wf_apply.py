@@ -10,7 +10,7 @@ spec.json 结构：
      "json_mode":"{\\"任务清单\\":[{\\"任务标题\\":\\"x\\"}]}",
      "outputs":[{"name":"任务清单","desc":"","type":"对象数组"}]},
     {"type":"loop","array":"任务清单","children":[
-      {"type":"record","base":"实验室秘书试点","table":"任务分工",
+      {"type":"record","base":"项目协作空间","table":"任务分工",
        "fields":{"目标":"任务标题"},"fixed":{"状态":"待认领","优先级":"中"}},
       {"type":"llm","model":"...","question_vars":["本次循环数据"],"prompt":"...","outputs":[...]}
     ]},
